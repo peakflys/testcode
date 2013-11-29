@@ -8,7 +8,7 @@ class FunctionTime
 	public:
 		FunctionTime(const std::string &_func) : func(_func)
 		{
-			clock_gettime(CLOCK_REALTIME,&tv_begin);//编译时需要加上-lrt
+			clock_gettime(CLOCK_REALTIME,&tv_begin);//when build, you should add -lrt
 		}
 		~FunctionTime()
 		{
@@ -16,7 +16,7 @@ class FunctionTime
 			clock_gettime(CLOCK_REALTIME,&tv_end);
 			unsigned long end = tv_end.tv_sec*1000000000 + tv_end.tv_nsec;
 			unsigned long begin = tv_begin.tv_sec*1000000000 + tv_begin.tv_nsec;
-			std::cout<<func<<"共运行"<<(end-begin)/1000000<<"毫秒"<<std::endl;
+			std::cout<<func<<" cost time: "<<(end-begin)/1000000<<std::endl;
 		}
 	private:
 		std::string func;

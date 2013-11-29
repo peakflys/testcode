@@ -1,5 +1,6 @@
 #include "checkTime.h"
 #include <fstream>
+#include <cstdlib>
 const unsigned int MAXNUM = 100000;
 int main()
 {
