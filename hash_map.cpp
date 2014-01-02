@@ -4,6 +4,33 @@
 
 using namespace std;
 
+/*
+ *\breif __gnu_cxx::hash_map is not standard, 
+ *\it will have some problem when key is string or long long int
+ */
+//solution 1
+namespace __gnu_cxx
+{
+    template<> 
+    struct hash<std::string>
+    {
+        size_t operator()( const std::string& x ) const
+        {
+            return hash< const char* >()( x.c_str() );
+        }
+    };
+
+    template<> 
+    struct hash<long long>
+    {
+        size_t operator()(long long x) const
+        {
+            return x;
+        }
+    };
+}
+
+//solution 2
 struct str_hash
 {
     size_t operator()(const string& str) const
