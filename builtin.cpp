@@ -10,12 +10,17 @@ void print()
 	//__builtin_return_address的参数0表示上层调用地址(即本层的返回地址)，1表示上上层调用地址
 	cout<<__builtin_return_address(0)<<"/"<<__builtin_return_address(1)<<endl;
 }
-void test()
+void test1()
 {
 	print();
 }
+void test2()
+{
+    print();
+}
 int main()
 {
-	test();
+	test1();
+    test2();
 	return 0;
 }
