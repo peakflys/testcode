@@ -37,6 +37,8 @@ int main()
 	pd->print();
 	Derive& rd = *(Derive*)&b;
 	rd.print();
+	Derive& rdd = (Derive&)b;
+	rdd.print();
 	delete pb;
 	return 0;
 }
