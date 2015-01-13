@@ -1,0 +1,182 @@
+#!/bin/bash
+#####################################################
+# brief:  server process manager
+# author: jefftian
+# date:   Mon Sep 15 14:30:30 CST 2014
+#####################################################
+basedir=$HOME/server_jjzw_ly/Server/Bin/Debug
+
+#functions
+startLogic() {
+    shutmemory
+    (cd $basedir/LogicServer/; sudo ./koa_logicsvrd -d)
+	sleep 1
+    pid=`pgrep koa_logicsvrd`
+    if [ "$pid" != "" ]; then
+        echo "logic server start success($pid)"
+    else
+        echo "logic server start failed"
+    fi
+}
+
+stopLogic() {
+    pid=`pgrep koa_logicsvrd`
+    if [ "$pid" = "" ]; then
+        echo "logic server is not live! "
+    else
+        sudo kill -9 $pid
+        echo "kill logic server($pid) success"
+    fi
+}
+
+startPK() {
+    (cd $basedir/PKServer; sudo ./koa_pklogic -d)
+	sleep 1
+    pid=`pgrep koa_pklogic`
+    if [ "$pid" != "" ]; then
+        echo "pk server start success($pid)"
+    else
+        echo "pk server start failed"
+    fi
+}
+
+stopPK() {
+    pid=`pgrep koa_pklogic`
+    if [ "$pid" = "" ]; then
+        echo "pk server is not live! "
+    else
+        sudo kill -9 $pid
+        echo "kill pk server($pid) success"
+    fi
+}
+
+startGow() {
+    (cd $basedir/gowdb; ./gowdbsvrd -d)
+    sleep 1
+    pids=`pgrep gowdb |tr '\n' ' '`
+    pidnum=`echo $pids|wc -w`
+    if [ $pidnum -eq 4 ]; then
+        echo "gowdb server start success(`echo $pids`)"
+    else
+        echo "gowdb server start failed"
+    fi
+}
+
+stopGow() {
+    pid=`pgrep gowdb |tr '\n' ' '|awk '{print $1}'`
+    if [ "$pid" = "" ]; then
+        echo "gowdb is not live! "
+    else
+        sudo kill -9 $pid
+        echo "kill gowdb pid($pid) success!"
+    fi
+}
+
+serverStatus() {
+    pid=`pgrep koa_logicsvrd |tr '\n' ' '`
+    if [ "$pid" = "" ]; then
+        echo "logic server is not live! "
+    else
+        echo "logic server pid: $pid"
+    fi
+    pid=`pgrep koa_pklogic |tr '\n' ' '`
+    if [ "$pid" = "" ]; then
+        echo "pk server is not live! "
+    else
+        echo "pk server pid: $pid"
+    fi
+    pid=`pgrep gowdb |tr '\n' ' '`
+    if [ "$pid" = "" ]; then
+        echo "gowdb is not live! "
+    else
+        echo "gowdb pid: $pid"
+    fi
+}
+
+start() {
+	startLogic
+	startPK
+    startGow
+}
+
+stop() {
+	stopPK
+	sleep 1
+	stopLogic
+	sleep 1
+    stopGow
+}
+
+restart() {
+	stop;
+	start;
+}
+
+#logic
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		restart
+		;;
+	startlogic)
+		startLogic
+		;;
+	stoplogic)
+		stopLogic
+		;;
+	restartlogic)
+		stopLogic
+        sleep 1
+        startLogic
+		;;
+	startpk)
+		startPK
+		;;
+	stoppk)
+		stopPK
+		;;
+	restartpk)
+		stopPK
+        sleep 1
+        startPK
+		;;
+	startgow)
+		startGow
+		;;
+	stopgow)
+		stopGow
+		;;
+	restartgow)
+		stopGow
+        sleep 1
+        startGow
+		;;
+    status)
+        serverStatus
+        ;;
+	help|*)
+		echo $"Usage: $0 {start|stop|restart|startLogic|stopLogic|startpk|stoppk|startgow|stopgow|status}"
+		cat <<EOF
+
+			start       - start all server
+			stop        - stop all server
+			restart     - restart all server
+			startLogic  - start logic
+			stopLogin   - stop logic
+			startpk     - start pk
+			stoppk      - stop pk
+			startgow    - start gow
+			stopgow     - stop gow
+            status      - print all server pid
+
+EOF
+		exit 1
+		;;	
+esac
+
+exit 0

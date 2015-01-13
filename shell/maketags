@@ -1,0 +1,2 @@
+#!/bin/bash
+(cd /home/jefftian/server_jjzw_ly; ctags -R include/ Server/gowdb/ Server/include/ Server/LibSource/ Server/LogicServer/ Server/protocol/ *)

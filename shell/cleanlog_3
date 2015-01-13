@@ -1,0 +1,2 @@
+#!/bin/bash
+find $1 -mtime +3 -name $2 -exec rm -rf {} \;

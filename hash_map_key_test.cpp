@@ -95,6 +95,25 @@ int main()
 #include <string>
 using namespace std;
 
+//string的hash函数标准里未给出，有以下两种方法定义：
+template<> 
+struct hash<std::string>
+{
+    size_t operator()( const std::string& x ) const
+    {
+        return hash< const char* >()( x.c_str() );
+    }
+};
+
+template<> 
+struct hash<long long>
+{
+    size_t operator()(long long x) const
+    {
+        return x;
+    }
+};
+
 struct str_hash
 {
     size_t operator()(const string& str) const

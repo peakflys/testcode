@@ -1,0 +1,3 @@
+#!/bin/bash
+
+scp -C $1 jefftian@10.0.128.213:$2

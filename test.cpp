@@ -1,42 +1,39 @@
-#include "checkTime.h"
+#include <iostream>
 
-const int MAXLEN = 64*1024*1024;
+using namespace std;
+
+#define check_func(func) \
+    do {\
+        if(1 != (ret = func))\
+        {\
+            result_id = ret;\
+            goto loop;\
+        }\
+    }while(0)
+
+int test(int a, int b)
+{
+    if(a < b)
+        return 1;
+    else if(a == b)
+        return 0;
+    else
+        return -1;
+}
 
 int main()
 {
-	/**
-	 *result: CPU cache is not useful for GCC -O0&-O2 ,why???
-	 */
-	int *pi = new int[MAXLEN];
-	{
-		FUNCTIME("CPUCACHE-MAXLEN "_S(__LINE__));
-		for(int i=0;i<MAXLEN;++i)
-			pi[i] *= 3;
-	}
-	{
-		FUNCTIME("CPUCACHE-MAXLEN/8 "_S(__LINE__));
-		for(int i=0;i<MAXLEN;i+=8)
-			pi[i] *= 3;
-	}
-	{
-		FUNCTIME("CPUCACHE-MAXLEN/16 "_S(__LINE__));
-		for(int i=0;i<MAXLEN;i+=16)
-			pi[i] *= 3;
-	}
-	{
-		FUNCTIME("CPUCACHE-MAXLEN/32 "_S(__LINE__));
-		for(int i=0;i<MAXLEN;i+=32)
-			pi[i] *= 3;
-	}
-	{
-		FUNCTIME("CPUCACHE-MAXLEN/64 "_S(__LINE__));
-		for(int i=0;i<MAXLEN;i+=64)
-			pi[i] *= 3;
-	}
-	{
-		FUNCTIME("CPUCACHE-MAXLEN/128 "_S(__LINE__));
-		for(int i=0;i<MAXLEN;i+=128)
-			pi[i] *= 3;
-	}
-	return 0;
+    char arr[][10] = {"China","American"};
+    char *p = arr[0];
+    printf("%s\n", p);
+    printf("%s\n", p+10);
+    return 0;
+    int a, b, ret, result_id;
+    cin >> a >> b;
+    check_func(test(a,b));
+    cout<<"this is next"<<endl;
+    return 0;
+loop:
+    cout<<"this is loop"<<endl;
+    return 0;
 }
