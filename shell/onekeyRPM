@@ -1,0 +1,22 @@
+#########################################
+#author jefftian
+#date Tue Aug 23 19:21:23 CST 2014
+#########################################
+#!/bin/bash
+
+logicdir="/data/servers"
+specfile="/root/rpmbuild/SPECS/123u-logic-server.spec"
+rpmfiledir="/root/rpmbuild/RPMS/x86_64/"
+
+echo "正在生成压缩包..."
+(cd $logicdir; tar zcf logic_install.tar.gz logic_install)
+echo "压缩包已生成，等待打包RPM..."
+dateString=`date +%Y%m%d`
+#sed双引号直接变量替换
+sed -i "3s/[[:digit:]]*[[:digit:]]/$dateString/" $specfile
+rpmbuild -bb $specfile 
+echo "========================================"
+rpmfile=`find $rpmfiledir -type f -mtime -1 | xargs ls -t | head -1`
+echo "RPM包打包完成: $rpmfile"
+echo "========================================"
+sz $rpmfile
