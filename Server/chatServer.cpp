@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <fcntl.h> //fcntl()和相应的宏
 #include <map>
+#include <vector>
 #include <iostream>
 #include <string>
 
@@ -32,11 +33,11 @@ int sendCmd(int fd)
 		writeable[fd] = true;
 		return 1;
 	}
-	for(std::vector<std::string> >::iterator it=sendData[fd].begin();it!=sendData[fd].end();)
+	for(std::vector<std::string>::iterator it=sendData[fd].begin();it!=sendData[fd].end();)
 	{
 		std::string data = *it;
 		std::cout<<"S->C :"<<data<<std::endl;
-		inet ret = ::send(fd,data.c_str(),strlen(data.c_str()),0);
+		int ret = ::send(fd,data.c_str(),strlen(data.c_str()),0);
 		if(-1 == ret || 0 == ret)
 		{
 			++it;
@@ -59,24 +60,24 @@ int sendCmd(int fd)
 
 int handleMsg(int fd)
 {
-	if(sendData.find(fd) != sendData.end())	
-		sendCmd(fd);
 	char buf[MAXBUF + 1];
 	bzero(buf,sizeof(buf));
 	int ret = ::recv(fd,buf,MAXBUF,0);
 	if(ret > 0)
 	{
 		std::cout<<"fd:"<<fd<<":"<<buf<<std::endl;
-		if(buf[0] = 'q')
+		if(buf[0] == 'q')
 		{
-			sendData[fd] = "Bye";
+			sendData[fd].push_back("Bye");
 			ret = -1;	//主动断开
 		}
 		else
 		{
-			sendData[fd] = "Hello guy,if you anwser q it means goodBye";
+			sendData[fd].push_back("Hello guy,if you anwser q it means goodBye");
 		}
 	}
+	if(sendData.find(fd) != sendData.end())	
+		sendCmd(fd);
 	return ret;
 }
 
@@ -131,7 +132,7 @@ int main()
 	int curfds = 1;
 	while(1)
 	{
-		int fdNums = epoll_wait(kdpfd,events,curfds,-1);
+		int fdNums = epoll_wait(kdpfd,events,curfds,0);
 		if(fdNums > 0)
 		{
 			for(int pos=0;pos<fdNums;++pos)
@@ -158,7 +159,7 @@ int main()
 						continue;
 					}
 
-					sendData[newfd] = "Welcom to TZL Server:";
+					sendData[newfd].push_back("Welcom to TZL Server:");
 
 					++curfds;		//add link num
 				}
