@@ -11,13 +11,17 @@
 #include <iostream>
 #include <string>
 
-const unsigned int PORT = 6666; 
+/*************************************************************************
+  实验证明，空载下的LT不存在问题，但是如果监听了EPOLLOUT事件且有空闲连接，
+  会造成CPU空载(其实就如同epoll_wait超时时间为0一样)
+**************************************************************************/
+
+const unsigned int PORT = 6667; 
 const unsigned int LISTENNUM = 2000; 
 const unsigned int MAXEPOLLSIZE = 10000;
 const unsigned int MAXBUF = 100*1024;
 
 static std::map<int,std::vector<std::string> > sendData;
-static std::map<int,bool > writeable;
 
 int setnonblocking(int fd)
 {
@@ -30,7 +34,6 @@ int sendCmd(int fd)
 {
 	if(sendData.find(fd) == sendData.end())
 	{
-		writeable[fd] = true;
 		return 1;
 	}
 	for(std::vector<std::string>::iterator it=sendData[fd].begin();it!=sendData[fd].end();)
@@ -45,7 +48,6 @@ int sendCmd(int fd)
 				continue;
 			if(EAGAIN == errno)
 			{
-				writeable[fd] = false;
 				return 1;
 			}
 			else
@@ -69,6 +71,7 @@ int handleMsg(int fd)
 		if(buf[0] == 'q')
 		{
 			sendData[fd].push_back("Bye");
+            sendCmd(fd);
 			ret = -1;	//主动断开
 		}
 		else
@@ -76,8 +79,6 @@ int handleMsg(int fd)
 			sendData[fd].push_back("Hello guy,if you anwser q it means goodBye");
 		}
 	}
-	if(sendData.find(fd) != sendData.end())	
-		sendCmd(fd);
 	return ret;
 }
 
@@ -124,7 +125,7 @@ int main()
 	int kdpfd = epoll_create(MAXEPOLLSIZE);
 	assert(-1 != kdpfd);
 	struct epoll_event ev;
-	ev.events = EPOLLIN | EPOLLET;
+	ev.events = EPOLLIN;
 	ev.data.fd = fd;
 	assert(0 == epoll_ctl(kdpfd,EPOLL_CTL_ADD,fd,&ev));
 	
@@ -150,7 +151,7 @@ int main()
 
 					setnonblocking(newfd);
 
-					ev.events = EPOLLIN |EPOLLOUT | EPOLLET;
+					ev.events = EPOLLIN |EPOLLOUT;
 					ev.data.fd = newfd;
 					if(0 != epoll_ctl(kdpfd,EPOLL_CTL_ADD,newfd,&ev))
 					{
